@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Run Backtest - Financial Wiki{% endblock %}
+{% block content %}
+<h1 class="page-title">Run 200-day moving average backtest</h1>
+<section class="section">
+  <p class="muted">This sample backtest uses cleaned Stooq bars already loaded into the database.</p>
+  <form method="post">
+    <label>Symbol<input name="symbol" value="AAPL"></label>
+    <p><button type="submit">Run backtest</button></p>
+  </form>
+</section>
+{% endblock %}

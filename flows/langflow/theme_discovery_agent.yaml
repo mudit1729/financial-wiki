@@ -1,0 +1,5 @@
+name: theme_discovery_agent
+purpose: Detect recurring themes across company documents and notes.
+guardrails: [rank_by_evidence_count, cite_chunks, avoid_overstating_sparse_mentions]
+inputs: [corpus_filter, theme_hint]
+outputs: [theme_definition, beneficiaries, losers, evidence_table, risks]

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}{{ company.name }} - Financial Wiki{% endblock %}
+{% block content %}
+<h1 class="page-title">{{ company.name }} <span class="muted">{{ company.ticker }}</span></h1>
+<section class="section">
+  <div class="grid cols-4">
+    <div><strong>Rank</strong><br>{{ company.market_cap_rank or "n/a" }}</div>
+    <div><strong>Market cap</strong><br>{% if company.market_cap %}${{ "%.0f"|format(company.market_cap) }}B{% else %}n/a{% endif %}</div>
+    <div><strong>Exchange</strong><br>{{ company.exchange or "n/a" }}</div>
+    <div><strong>Country</strong><br>{{ company.country or "n/a" }}</div>
+  </div>
+  <p class="muted">Ranking date: {{ company.ranking_date or "n/a" }}. Source: {{ company.ranking_source or "n/a" }}.</p>
+  <p>{{ company.one_line_thesis or "No one-line thesis yet. Add source-backed notes after ingesting documents." }}</p>
+</section>
+<section class="grid cols-2">
+  <div class="section">
+    <h2>Business profile</h2>
+    <p>{{ company.description or "Stub company profile. Upload filings, annual reports, transcripts, presentations, and notes to make this page source-backed." }}</p>
+    <p><strong>Sector:</strong> {{ company.sector or "n/a" }}<br><strong>Industry:</strong> {{ company.industry or "n/a" }}</p>
+    <p><strong>Website:</strong> {% if company.website %}<a href="{{ company.website }}">{{ company.website }}</a>{% else %}n/a{% endif %}</p>
+    <p><strong>Investor relations:</strong> {% if company.investor_relations_url %}<a href="{{ company.investor_relations_url }}">{{ company.investor_relations_url }}</a>{% else %}n/a{% endif %}</p>
+  </div>
+  <div class="section">
+    <h2>Research map</h2>
+    <p><strong>Revenue segments</strong><br>{{ company.revenue_segments or "TBD" }}</p>
+    <p><strong>Geographic exposure</strong><br>{{ company.geographic_exposure or "TBD" }}</p>
+    <p><strong>Competitors</strong><br>{{ company.competitors or "TBD" }}</p>
+    <p><strong>Related themes</strong><br>{% for theme in company.themes or [] %}<span class="badge">{{ theme }}</span>{% else %}TBD{% endfor %}</p>
+  </div>
+</section>
+<section class="section">
+  <h2>Company research checklist</h2>
+  <div class="grid cols-2">
+    <p><strong>Value chain position</strong><br>{{ company.value_chain_position or "TBD" }}</p>
+    <p><strong>Moat</strong><br>{{ company.moat or "TBD" }}</p>
+    <p><strong>Management and capital allocation</strong><br>{{ company.management_capital_allocation or "TBD" }}</p>
+    <p><strong>Unit economics</strong><br>{{ company.unit_economics or "TBD" }}</p>
+    <p><strong>Growth drivers</strong><br>{{ company.growth_drivers or "TBD" }}</p>
+    <p><strong>Key risks</strong><br>{% for tag in company.risk_tags or [] %}<span class="badge">{{ tag }}</span>{% else %}TBD{% endfor %}</p>
+    <p><strong>Macro/geopolitical exposure</strong><br>{{ company.macro_exposures or "TBD" }}</p>
+    <p><strong>Valuation notes</strong><br>{{ company.valuation_notes or "TBD" }}</p>
+  </div>
+</section>
+<section class="section">
+  <h2>Linked documents</h2>
+  <table class="table">
+    <thead><tr><th>Title</th><th>Type</th><th>Fiscal year</th><th>Chunks</th><th>Source</th></tr></thead>
+    <tbody>
+      {% for doc in company.documents %}
+      <tr><td>{{ doc.title }}</td><td>{{ doc.document_type }}</td><td>{{ doc.fiscal_year or "" }}</td><td>{{ doc.chunks|length }}</td><td>{% if doc.source_url %}<a href="{{ doc.source_url }}">source</a>{% endif %}</td></tr>
+      {% else %}
+      <tr><td colspan="5" class="muted">No documents indexed for this company yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

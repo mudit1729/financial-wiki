@@ -1,0 +1,5 @@
+name: filing_transcript_summarizer
+purpose: Summarize a filing, annual report, transcript, or presentation into business drivers, risks, guidance, capex, margins, and capital allocation.
+guardrails: [cite_sources, distinguish_management_claims_from_evidence, no_investment_advice]
+inputs: [document_id, ticker]
+outputs: [executive_summary, key_metrics, risk_factors, citations, follow_up_questions]

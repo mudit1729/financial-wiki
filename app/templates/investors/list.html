@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Investors - Financial Wiki{% endblock %}
+{% block content %}
+<h1 class="page-title">Investor lessons</h1>
+{% for investor in investors %}
+<section class="section">
+  <h2>{{ investor.name }}</h2>
+  <p>{{ investor.profile }}</p>
+  <p><strong>Core principles</strong><br>{{ investor.core_principles }}</p>
+  <p><strong>Favorite setups</strong><br>{{ investor.favorite_setups or "TBD" }}</p>
+  <p><strong>Risk management lessons</strong><br>{{ investor.risk_lessons or "TBD" }}</p>
+</section>
+{% endfor %}
+{% endblock %}

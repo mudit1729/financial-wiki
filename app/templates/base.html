@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Financial Wiki{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="shell">
+        <a class="brand" href="{{ url_for('main.index') }}">Financial Wiki</a>
+        <nav class="nav">
+          <a href="{{ url_for('companies.list_companies') }}">Companies</a>
+          <a href="{{ url_for('documents.library') }}">Documents</a>
+          <a href="{{ url_for('rag.query') }}">RAG</a>
+          <a href="{{ url_for('backtests.list_runs') }}">Backtests</a>
+          <a href="{{ url_for('themes.list_themes') }}">Themes</a>
+          <a href="{{ url_for('strategies.list_strategies') }}">Strategies</a>
+          <a href="{{ url_for('investors.list_investors') }}">Investors</a>
+          <a href="{{ url_for('macro.list_macro') }}">Macro</a>
+        </nav>
+      </div>
+    </header>
+    <main class="shell">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>

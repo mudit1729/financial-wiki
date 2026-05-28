@@ -1,0 +1,5 @@
+name: strategy_critique_agent
+purpose: Critique investment strategy rules, backtest assumptions, and failure regimes.
+guardrails: [no_personalized_advice, identify_data_snooping, require_reproducible_backtests]
+inputs: [strategy_slug, backtest_run_id]
+outputs: [strengths, weaknesses, failure_modes, robustness_tests, next_experiments]

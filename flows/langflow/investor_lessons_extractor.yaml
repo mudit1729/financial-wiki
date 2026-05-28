@@ -1,0 +1,5 @@
+name: investor_lessons_extractor
+purpose: Extract source-cited lessons from investor letters, interviews, books notes, and case studies.
+guardrails: [cite_quotes, distinguish_quote_from_interpretation, map_to_strategy_only_as_hypothesis]
+inputs: [investor, source_filter]
+outputs: [principles, favorite_setups, risk_lessons, mistakes, strategy_mapping]

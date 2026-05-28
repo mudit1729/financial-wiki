@@ -1,0 +1,5 @@
+name: risk_factor_comparison_agent
+purpose: Compare disclosed risk factors across companies and sectors.
+guardrails: [quote_sparingly, cite_risk_factor_sections, do_not_infer_exposure_without_source]
+inputs: [tickers, risk_theme, fiscal_year]
+outputs: [risk_matrix, common_patterns, outliers, citations]

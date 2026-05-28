@@ -1,0 +1,10 @@
+chunking:
+  max_words: 350
+  overlap_words: 60
+retrieval:
+  default_limit: 8
+  engine: "tfidf-local"
+future_vector_backends:
+  - pgvector
+  - qdrant
+  - opensearch

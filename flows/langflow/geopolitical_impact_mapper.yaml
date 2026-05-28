@@ -1,0 +1,5 @@
+name: geopolitical_impact_mapper
+purpose: Map macro or geopolitical events to sectors, supply chains, countries, and companies.
+guardrails: [state_assumptions, cite_sources, list_bull_base_bear_scenarios]
+inputs: [event, countries, sectors]
+outputs: [transmission_channels, affected_companies, scenarios, indicators_to_watch]

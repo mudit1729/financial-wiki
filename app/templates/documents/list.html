@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Documents - Financial Wiki{% endblock %}
+{% block content %}
+<h1 class="page-title">Document library</h1>
+<p><a class="button" href="{{ url_for('documents.upload') }}">Upload document</a></p>
+<section class="section">
+  <table class="table">
+    <thead><tr><th>Title</th><th>Ticker</th><th>Type</th><th>Fiscal year</th><th>Chunks</th><th>Indexed</th></tr></thead>
+    <tbody>
+      {% for doc in documents %}
+      <tr><td>{{ doc.title }}</td><td>{{ doc.ticker or "" }}</td><td>{{ doc.document_type }}</td><td>{{ doc.fiscal_year or "" }}</td><td>{{ doc.chunks|length }}</td><td>{{ "yes" if doc.indexed_for_rag else "no" }}</td></tr>
+      {% else %}
+      <tr><td colspan="6" class="muted">No documents yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

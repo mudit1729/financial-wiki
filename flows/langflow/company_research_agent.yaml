@@ -1,0 +1,8 @@
+name: company_research_agent
+purpose: Build a source-cited company research summary from indexed filings, transcripts, presentations, and notes.
+guardrails:
+  - Do not make unsupported investment recommendations.
+  - Cite every material claim with document title and page or section when available.
+  - Surface uncertainty, missing sources, and open questions.
+inputs: [ticker, research_question, fiscal_year, document_filters]
+outputs: [summary, citations, assumptions, risks, open_questions]

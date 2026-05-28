@@ -1,0 +1,5 @@
+name: capex_trend_analysis_agent
+purpose: Analyze capex trends and stated investment drivers across filings and transcripts.
+guardrails: [separate_reported_numbers_from_management_commentary, cite_sources, flag_missing_years]
+inputs: [tickers, years]
+outputs: [capex_summary, trend_table, drivers, risks, citations]

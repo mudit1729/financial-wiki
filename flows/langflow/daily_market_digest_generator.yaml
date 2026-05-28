@@ -1,0 +1,5 @@
+name: daily_market_digest_generator
+purpose: Produce a daily source-cited market digest from uploaded notes, filings, macro sources, and watchlist changes.
+guardrails: [no_unsupported_claims, include_uncertainty, flag_missing_sources]
+inputs: [date, watchlists, themes]
+outputs: [digest, key_moves, company_mentions, risks, questions]

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}RAG - Financial Wiki{% endblock %}
+{% block content %}
+<h1 class="page-title">Source-cited RAG</h1>
+<section class="section">
+  <p class="muted">Indexed documents: {{ status.document_count }}. Indexed chunks: {{ status.chunk_count }}.</p>
+  <form method="post">
+    <label>Question<textarea name="question" required>{{ question }}</textarea></label>
+    <div class="form-grid">
+      <label>Company
+        <select name="ticker">
+          <option value="">Any</option>
+          {% for company in companies %}<option value="{{ company.ticker }}">{{ company.name }} ({{ company.ticker }})</option>{% endfor %}
+        </select>
+      </label>
+      <label>Document type<input name="document_type" placeholder="annual_report"></label>
+      <label>Sector<input name="sector"></label>
+      <label>Country<input name="country"></label>
+      <label>Fiscal year<input type="number" name="year"></label>
+      <label>Theme
+        <select name="theme">
+          <option value="">Any</option>
+          {% for theme in themes %}<option value="{{ theme.slug }}">{{ theme.name }}</option>{% endfor %}
+        </select>
+      </label>
+    </div>
+    <p><button type="submit">Retrieve evidence</button></p>
+  </form>
+</section>
+{% if result %}
+<section class="section">
+  <h2>Answer panel</h2>
+  <pre class="chunk">{{ result.answer }}</pre>
+</section>
+<section class="section">
+  <h2>Source citations</h2>
+  <table class="table">
+    <thead><tr><th>Title</th><th>Ticker</th><th>Type</th><th>Page/section</th><th>Score</th></tr></thead>
+    <tbody>{% for cite in result.citations %}
+      <tr><td>{% if cite.source_url %}<a href="{{ cite.source_url }}">{{ cite.title }}</a>{% else %}{{ cite.title }}{% endif %}</td><td>{{ cite.ticker }}</td><td>{{ cite.document_type }}</td><td>{{ cite.page_number or cite.section or "" }}</td><td>{{ cite.score }}</td></tr>
+    {% endfor %}</tbody>
+  </table>
+</section>
+<section class="section">
+  <h2>Retrieved chunks</h2>
+  {% for chunk in result.chunks %}
+    <h3>Chunk {{ chunk.id }} <span class="muted">score {{ chunk.score }}</span></h3>
+    <pre class="chunk">{{ chunk.text }}</pre>
+  {% endfor %}
+</section>
+{% endif %}
+{% endblock %}

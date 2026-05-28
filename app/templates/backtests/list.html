@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Backtests - Financial Wiki{% endblock %}
+{% block content %}
+<h1 class="page-title">Backtests</h1>
+<p><a class="button" href="{{ url_for('backtests.run') }}">Run sample backtest</a></p>
+<section class="section">
+  <table class="table">
+    <thead><tr><th>Name</th><th>Symbols</th><th>Range</th><th>Status</th></tr></thead>
+    <tbody>{% for run in runs %}
+      <tr><td><a href="{{ url_for('backtests.detail', run_id=run.id) }}">{{ run.name }}</a></td><td>{{ run.symbols }}</td><td>{{ run.start_date }} to {{ run.end_date }}</td><td>{{ run.status }}</td></tr>
+    {% else %}
+      <tr><td colspan="4" class="muted">No runs yet.</td></tr>
+    {% endfor %}</tbody>
+  </table>
+</section>
+{% endblock %}

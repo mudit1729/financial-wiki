@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Upload Document - Financial Wiki{% endblock %}
+{% block content %}
+<h1 class="page-title">Upload source document</h1>
+<section class="section">
+  <form method="post" enctype="multipart/form-data">
+    <div class="form-grid">
+      <label>File<input type="file" name="file" required></label>
+      <label>Company
+        <select name="ticker">
+          <option value="">Unassigned</option>
+          {% for company in companies %}<option value="{{ company.ticker }}">{{ company.name }} ({{ company.ticker }})</option>{% endfor %}
+        </select>
+      </label>
+      <label>Document type
+        <select name="document_type">
+          {% for kind in ["annual_report", "10-k", "10-q", "8-k", "20-f", "proxy", "presentation", "transcript", "note"] %}
+            <option value="{{ kind }}">{{ kind }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Title<input name="title" placeholder="Optional"></label>
+      <label>Source URL<input name="source_url" placeholder="https://"></label>
+      <label>Filing date<input type="date" name="filing_date"></label>
+      <label>Fiscal year<input type="number" name="fiscal_year" min="1900" max="2100"></label>
+      <label>Theme<input name="theme" placeholder="ai-infrastructure"></label>
+    </div>
+    <p><button type="submit">Ingest and index</button></p>
+  </form>
+</section>
+{% endblock %}

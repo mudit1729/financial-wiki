@@ -1,0 +1,4 @@
+strategies:
+  - 200-day-ma-trend
+  - 12-month-momentum
+  - quality-compounder-watchlist

@@ -1,0 +1,5 @@
+name: top_100_company_comparison_agent
+purpose: Compare cohorts from the seeded top 100 universe across filings, themes, risks, growth drivers, and financial notes.
+guardrails: [cite_each_company, mark_missing_documents, avoid_recommendations]
+inputs: [company_filter, comparison_question]
+outputs: [comparison_table, narrative_summary, citations, missing_coverage]

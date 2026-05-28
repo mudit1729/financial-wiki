@@ -54,7 +54,10 @@ def register(app):
     @app.cli.command("download-stooq")
     @click.option("--symbol", multiple=True)
     @click.option("--config", default="configs/symbols.yaml", show_default=True)
-    def download_stooq_cmd(symbol, config):
+    @click.option("--start", "start_date", type=click.DateTime(formats=["%Y-%m-%d"]))
+    @click.option("--end", "end_date", type=click.DateTime(formats=["%Y-%m-%d"]))
+    @click.option("--refresh/--use-cache", default=False, show_default=True)
+    def download_stooq_cmd(symbol, config, start_date, end_date, refresh):
         symbols = list(symbol)
         if not symbols and Path(config).exists():
             payload = yaml.safe_load(Path(config).read_text(encoding="utf-8"))
@@ -68,6 +71,9 @@ def register(app):
                     current_app.config["STORAGE_ROOT"] / "raw" / "stooq",
                     current_app.config["STOOQ_BASE_URL"],
                     current_app.config.get("STOOQ_API_KEY"),
+                    start_date.date() if start_date else None,
+                    end_date.date() if end_date else None,
+                    refresh,
                 )
                 cleaned, issues = load_clean_prices(raw_path, sym, current_app.config["STORAGE_ROOT"] / "processed" / "prices")
             except Exception as exc:

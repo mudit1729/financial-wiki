@@ -1,3 +1,4 @@
+from datetime import date
 from pathlib import Path
 
 import pandas as pd
@@ -11,27 +12,59 @@ REQUIRED_COLUMNS = ["Date", "Open", "High", "Low", "Close", "Volume"]
 
 
 def stooq_symbol(symbol: str) -> str:
-    symbol = symbol.lower()
+    symbol = symbol.strip().lower()
+    if not symbol:
+        raise ValueError("empty symbol")
     if "." not in symbol:
         return f"{symbol}.us"
     return symbol
 
 
-def download_daily(symbol: str, raw_dir: Path, base_url: str, api_key: str | None = None) -> Path:
+def looks_like_stooq_csv(path: Path) -> bool:
+    try:
+        first_line = Path(path).read_text(encoding="utf-8", errors="ignore").splitlines()[0]
+    except (IndexError, OSError):
+        return False
+    return first_line.startswith("Date,")
+
+
+def download_daily(
+    symbol: str,
+    raw_dir: Path,
+    base_url: str,
+    api_key: str | None = None,
+    start: date | None = None,
+    end: date | None = None,
+    refresh: bool = False,
+) -> Path:
     raw_dir = Path(raw_dir)
     raw_dir.mkdir(parents=True, exist_ok=True)
     stooq = stooq_symbol(symbol)
+    path = raw_dir / f"{stooq}.csv"
+
+    if path.exists() and not refresh:
+        if looks_like_stooq_csv(path):
+            return path
+        path.unlink()
+
     params = {"s": stooq, "i": "d"}
+    if start:
+        params["d1"] = start.strftime("%Y%m%d")
+    if end:
+        params["d2"] = end.strftime("%Y%m%d")
     if api_key:
         params["apikey"] = api_key
     response = requests.get(base_url, params=params, timeout=30)
     response.raise_for_status()
-    if not response.text.lstrip().startswith("Date,"):
+    text = response.text.strip()
+    if not text or text.lower().startswith("no data"):
+        raise ValueError(f"No Stooq data returned for {symbol} ({stooq})")
+    if "get your apikey" in text.lower() or not text.splitlines()[0].startswith("Date,"):
         raise RuntimeError(
-            "Stooq did not return a daily CSV. If Stooq requires an API key in your region/session, set STOOQ_API_KEY and retry."
+            "Stooq did not return price CSV data. Set STOOQ_API_KEY in your environment "
+            "or place an existing Stooq CSV cache file in data/raw/stooq."
         )
-    path = raw_dir / f"{symbol.upper()}.csv"
-    path.write_text(response.text, encoding="utf-8")
+    path.write_text(text + "\n", encoding="utf-8")
     return path
 
 

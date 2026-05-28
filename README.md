@@ -98,16 +98,18 @@ flask download-stooq
 Or one symbol:
 
 ```bash
-flask download-stooq --symbol AAPL
+flask download-stooq --symbol AAPL --start 2000-01-01 --end 2026-05-27
 ```
 
-Raw CSVs remain unchanged in `data/raw/stooq/`. Cleaned CSVs are saved under `data/processed/prices/`, and price bars are upserted into the database.
+Raw CSVs remain unchanged in `data/raw/stooq/` using normalized Stooq names such as `aapl.us.csv`. Cleaned CSVs are saved under `data/processed/prices/`, and price bars are upserted into the database. By default the downloader reuses a valid local Stooq CSV cache; pass `--refresh` to force a new download.
 
 If Stooq requires an API key in your region/session, set:
 
 ```bash
 export STOOQ_API_KEY=...
 ```
+
+You can also place existing Stooq CSV cache files in `data/raw/stooq/` and run `flask download-stooq --symbol AAPL`; the app will validate and reuse the cached CSV.
 
 ## Backtests
 

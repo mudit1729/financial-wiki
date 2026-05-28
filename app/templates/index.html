@@ -1,45 +1,97 @@
 {% extends "base.html" %}
 {% block title %}Dashboard - Financial Wiki{% endblock %}
 {% block content %}
-<h1 class="page-title">Financial intelligence dashboard</h1>
-<section class="grid cols-4">
+<div class="page-header">
+  <div>
+    <div class="page-kicker">Command center</div>
+    <h1 class="page-title">Financial intelligence dashboard</h1>
+    <p class="page-subtitle">Track the research universe, source coverage, retrieval readiness, and backtest activity from one dense operating view.</p>
+  </div>
+  <div class="page-actions">
+    <a class="button secondary" href="{{ url_for('rag.query') }}">Query evidence</a>
+    <a class="button" href="{{ url_for('documents.upload') }}">Upload document</a>
+  </div>
+</div>
+
+<section class="stat-grid">
   {% for label, value in stats.items() %}
-    <div class="stat"><strong>{{ value }}</strong><span class="muted">{{ label|replace('_', ' ')|title }}</span></div>
+    <div class="stat">
+      <span class="stat-label">{{ label|replace('_', ' ')|title }}</span>
+      <strong>{{ value }}</strong>
+      <small>Current workspace count</small>
+    </div>
   {% endfor %}
 </section>
-<section class="section">
-  <h2>Top seeded companies</h2>
-  <table class="table">
-    <thead><tr><th>Rank</th><th>Company</th><th>Sector</th><th>Country</th><th>Market cap</th></tr></thead>
-    <tbody>
-      {% for company in top_companies %}
-      <tr>
-        <td>{{ company.market_cap_rank }}</td>
-        <td><a href="{{ url_for('companies.detail', ticker=company.ticker) }}">{{ company.name }}</a> <span class="muted">{{ company.ticker }}</span></td>
-        <td>{{ company.sector or "" }}</td>
-        <td>{{ company.country or "" }}</td>
-        <td>{% if company.market_cap %}${{ "%.0f"|format(company.market_cap) }}B{% endif %}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+
+<section class="section flush">
+  <div class="section-pad">
+    <div class="section-head">
+      <div class="section-title">
+        <h2>Top seeded companies</h2>
+        <p>Market-cap ordered research targets with quick links into company notes.</p>
+      </div>
+      <a href="{{ url_for('companies.list_companies') }}">View universe</a>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Rank</th><th>Company</th><th>Sector</th><th>Country</th><th class="numeric">Market cap</th></tr></thead>
+      <tbody>
+        {% for company in top_companies %}
+        <tr>
+          <td class="nowrap">{{ company.market_cap_rank }}</td>
+          <td>
+            <span class="entity">
+              <a class="entity-title" href="{{ url_for('companies.detail', ticker=company.ticker) }}">{{ company.name }}</a>
+              <span class="entity-meta">{{ company.ticker }}</span>
+            </span>
+          </td>
+          <td>{{ company.sector or "" }}</td>
+          <td>{{ company.country or "" }}</td>
+          <td class="numeric">{% if company.market_cap %}${{ "%.0f"|format(company.market_cap) }}B{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </section>
+
 <section class="grid cols-2">
   <div class="section">
-    <h2>Recent documents</h2>
-    {% for doc in recent_docs %}
-      <p><a href="{{ doc.source_url or '#' }}">{{ doc.title }}</a><br><span class="muted">{{ doc.ticker }} {{ doc.document_type }}</span></p>
-    {% else %}
-      <p class="muted">No documents indexed yet.</p>
-    {% endfor %}
+    <div class="section-head">
+      <div class="section-title">
+        <h2>Recent documents</h2>
+        <p>Latest source material available to retrieval workflows.</p>
+      </div>
+    </div>
+    <div class="activity-list">
+      {% for doc in recent_docs %}
+        <div class="activity-item">
+          <a href="{{ doc.source_url or '#' }}">{{ doc.title }}</a>
+          <span class="entity-meta">{{ doc.ticker }} {{ doc.document_type }}</span>
+        </div>
+      {% else %}
+        <div class="empty-state">No documents indexed yet.</div>
+      {% endfor %}
+    </div>
   </div>
   <div class="section">
-    <h2>Recent backtests</h2>
-    {% for run in recent_backtests %}
-      <p><a href="{{ url_for('backtests.detail', run_id=run.id) }}">{{ run.name }}</a><br><span class="muted">{{ run.start_date }} to {{ run.end_date }}</span></p>
-    {% else %}
-      <p class="muted">No backtests saved yet.</p>
-    {% endfor %}
+    <div class="section-head">
+      <div class="section-title">
+        <h2>Recent backtests</h2>
+        <p>Stored strategy runs and date ranges for follow-up review.</p>
+      </div>
+    </div>
+    <div class="activity-list">
+      {% for run in recent_backtests %}
+        <div class="activity-item">
+          <a href="{{ url_for('backtests.detail', run_id=run.id) }}">{{ run.name }}</a>
+          <span class="entity-meta">{{ run.start_date }} to {{ run.end_date }}</span>
+        </div>
+      {% else %}
+        <div class="empty-state">No backtests saved yet.</div>
+      {% endfor %}
+    </div>
   </div>
 </section>
 {% endblock %}

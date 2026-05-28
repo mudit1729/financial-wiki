@@ -1,15 +1,31 @@
 {% extends "base.html" %}
 {% block title %}Strategies - Financial Wiki{% endblock %}
 {% block content %}
-<h1 class="page-title">Investment strategies</h1>
-{% for strategy in strategies %}
-<section class="section">
-  <h2>{{ strategy.name }}</h2>
-  <p>{{ strategy.thesis }}</p>
-  <p><strong>Rules</strong><br>{{ strategy.rules }}</p>
-  <p><strong>Entry logic</strong><br>{{ strategy.entry_logic or "TBD" }}</p>
-  <p><strong>Exit logic</strong><br>{{ strategy.exit_logic or "TBD" }}</p>
-  <p><strong>Risk controls</strong><br>{{ strategy.risk_controls or "TBD" }}</p>
+<div class="page-header">
+  <div>
+    <div class="page-kicker">Playbooks</div>
+    <h1 class="page-title">Investment strategies</h1>
+    <p class="page-subtitle">Codified theses, operating rules, entries, exits, and controls for repeatable research workflows.</p>
+  </div>
+  <div class="page-actions">
+    <a class="button secondary" href="{{ url_for('backtests.list_runs') }}">Review backtests</a>
+  </div>
+</div>
+
+<section class="grid cols-2">
+  {% for strategy in strategies %}
+  <article class="research-card">
+    <h2>{{ strategy.name }}</h2>
+    <p class="summary">{{ strategy.thesis }}</p>
+    <dl class="data-list">
+      <div><dt>Rules</dt><dd>{{ strategy.rules }}</dd></div>
+      <div><dt>Entry</dt><dd>{{ strategy.entry_logic or "TBD" }}</dd></div>
+      <div><dt>Exit</dt><dd>{{ strategy.exit_logic or "TBD" }}</dd></div>
+      <div><dt>Risk controls</dt><dd>{{ strategy.risk_controls or "TBD" }}</dd></div>
+    </dl>
+  </article>
+  {% else %}
+  <div class="empty-state">No strategies loaded.</div>
+  {% endfor %}
 </section>
-{% endfor %}
 {% endblock %}

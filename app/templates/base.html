@@ -9,20 +9,26 @@
   <body>
     <header class="topbar">
       <div class="shell">
-        <a class="brand" href="{{ url_for('main.index') }}">Financial Wiki</a>
+        <a class="brand" href="{{ url_for('main.index') }}">
+          <span class="brand-mark">FW</span>
+          <span class="brand-text">
+            <span class="brand-name">Financial Wiki</span>
+            <span class="brand-subtitle">Research OS</span>
+          </span>
+        </a>
         <nav class="nav">
-          <a href="{{ url_for('companies.list_companies') }}">Companies</a>
-          <a href="{{ url_for('documents.library') }}">Documents</a>
-          <a href="{{ url_for('rag.query') }}">RAG</a>
-          <a href="{{ url_for('backtests.list_runs') }}">Backtests</a>
-          <a href="{{ url_for('themes.list_themes') }}">Themes</a>
-          <a href="{{ url_for('strategies.list_strategies') }}">Strategies</a>
-          <a href="{{ url_for('investors.list_investors') }}">Investors</a>
-          <a href="{{ url_for('macro.list_macro') }}">Macro</a>
+          <a class="{{ 'active' if request.endpoint and request.endpoint.startswith('companies.') else '' }}" href="{{ url_for('companies.list_companies') }}">Companies</a>
+          <a class="{{ 'active' if request.endpoint and request.endpoint.startswith('documents.') else '' }}" href="{{ url_for('documents.library') }}">Documents</a>
+          <a class="{{ 'active' if request.endpoint and request.endpoint.startswith('rag.') else '' }}" href="{{ url_for('rag.query') }}">RAG</a>
+          <a class="{{ 'active' if request.endpoint and request.endpoint.startswith('backtests.') else '' }}" href="{{ url_for('backtests.list_runs') }}">Backtests</a>
+          <a class="{{ 'active' if request.endpoint and request.endpoint.startswith('themes.') else '' }}" href="{{ url_for('themes.list_themes') }}">Themes</a>
+          <a class="{{ 'active' if request.endpoint and request.endpoint.startswith('strategies.') else '' }}" href="{{ url_for('strategies.list_strategies') }}">Strategies</a>
+          <a class="{{ 'active' if request.endpoint and request.endpoint.startswith('investors.') else '' }}" href="{{ url_for('investors.list_investors') }}">Investors</a>
+          <a class="{{ 'active' if request.endpoint and request.endpoint.startswith('macro.') else '' }}" href="{{ url_for('macro.list_macro') }}">Macro</a>
         </nav>
       </div>
     </header>
-    <main class="shell">
+    <main class="shell page">
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% for category, message in messages %}
           <div class="flash {{ category }}">{{ message }}</div>

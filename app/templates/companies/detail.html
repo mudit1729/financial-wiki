@@ -1,57 +1,114 @@
 {% extends "base.html" %}
 {% block title %}{{ company.name }} - Financial Wiki{% endblock %}
 {% block content %}
-<h1 class="page-title">{{ company.name }} <span class="muted">{{ company.ticker }}</span></h1>
-<section class="section">
-  <div class="grid cols-4">
-    <div><strong>Rank</strong><br>{{ company.market_cap_rank or "n/a" }}</div>
-    <div><strong>Market cap</strong><br>{% if company.market_cap %}${{ "%.0f"|format(company.market_cap) }}B{% else %}n/a{% endif %}</div>
-    <div><strong>Exchange</strong><br>{{ company.exchange or "n/a" }}</div>
-    <div><strong>Country</strong><br>{{ company.country or "n/a" }}</div>
+<div class="page-header">
+  <div>
+    <div class="page-kicker">Company research file</div>
+    <h1 class="page-title">{{ company.name }}</h1>
+    <p class="page-subtitle">
+      <span class="badge accent">{{ company.ticker }}</span>
+      <span class="badge">{{ company.sector or "Sector pending" }}</span>
+      <span class="badge">{{ company.country or "Country pending" }}</span>
+    </p>
   </div>
-  <p class="muted">Ranking date: {{ company.ranking_date or "n/a" }}. Source: {{ company.ranking_source or "n/a" }}.</p>
-  <p>{{ company.one_line_thesis or "No one-line thesis yet. Add source-backed notes after ingesting documents." }}</p>
+  <div class="page-actions">
+    <a class="button secondary" href="{{ url_for('companies.list_companies') }}">Company universe</a>
+    <a class="button" href="{{ url_for('documents.upload') }}">Add source</a>
+  </div>
+</div>
+
+<section class="section">
+  <div class="metric-strip">
+    <div class="metric"><span>Rank</span><strong>{{ company.market_cap_rank or "n/a" }}</strong></div>
+    <div class="metric"><span>Market cap</span><strong>{% if company.market_cap %}${{ "%.0f"|format(company.market_cap) }}B{% else %}n/a{% endif %}</strong></div>
+    <div class="metric"><span>Exchange</span><strong>{{ company.exchange or "n/a" }}</strong></div>
+    <div class="metric"><span>Country</span><strong>{{ company.country or "n/a" }}</strong></div>
+  </div>
+  <p class="muted mt-12">Ranking date: {{ company.ranking_date or "n/a" }}. Source: {{ company.ranking_source or "n/a" }}.</p>
+  <p class="thesis">{{ company.one_line_thesis or "No one-line thesis yet. Add source-backed notes after ingesting documents." }}</p>
 </section>
+
 <section class="grid cols-2">
   <div class="section">
-    <h2>Business profile</h2>
+    <div class="section-head">
+      <div class="section-title">
+        <h2>Business profile</h2>
+        <p>Core description and source destinations.</p>
+      </div>
+    </div>
     <p>{{ company.description or "Stub company profile. Upload filings, annual reports, transcripts, presentations, and notes to make this page source-backed." }}</p>
-    <p><strong>Sector:</strong> {{ company.sector or "n/a" }}<br><strong>Industry:</strong> {{ company.industry or "n/a" }}</p>
-    <p><strong>Website:</strong> {% if company.website %}<a href="{{ company.website }}">{{ company.website }}</a>{% else %}n/a{% endif %}</p>
-    <p><strong>Investor relations:</strong> {% if company.investor_relations_url %}<a href="{{ company.investor_relations_url }}">{{ company.investor_relations_url }}</a>{% else %}n/a{% endif %}</p>
+    <dl class="data-list">
+      <div><dt>Sector</dt><dd>{{ company.sector or "n/a" }}</dd></div>
+      <div><dt>Industry</dt><dd>{{ company.industry or "n/a" }}</dd></div>
+      <div><dt>Website</dt><dd>{% if company.website %}<a href="{{ company.website }}">{{ company.website }}</a>{% else %}n/a{% endif %}</dd></div>
+      <div><dt>Investor relations</dt><dd>{% if company.investor_relations_url %}<a href="{{ company.investor_relations_url }}">{{ company.investor_relations_url }}</a>{% else %}n/a{% endif %}</dd></div>
+    </dl>
   </div>
   <div class="section">
-    <h2>Research map</h2>
-    <p><strong>Revenue segments</strong><br>{{ company.revenue_segments or "TBD" }}</p>
-    <p><strong>Geographic exposure</strong><br>{{ company.geographic_exposure or "TBD" }}</p>
-    <p><strong>Competitors</strong><br>{{ company.competitors or "TBD" }}</p>
-    <p><strong>Related themes</strong><br>{% for theme in company.themes or [] %}<span class="badge">{{ theme }}</span>{% else %}TBD{% endfor %}</p>
+    <div class="section-head">
+      <div class="section-title">
+        <h2>Research map</h2>
+        <p>Segment, exposure, competitive, and thematic context.</p>
+      </div>
+    </div>
+    <dl class="data-list">
+      <div><dt>Revenue segments</dt><dd>{{ company.revenue_segments or "TBD" }}</dd></div>
+      <div><dt>Geographic exposure</dt><dd>{{ company.geographic_exposure or "TBD" }}</dd></div>
+      <div><dt>Competitors</dt><dd>{{ company.competitors or "TBD" }}</dd></div>
+      <div><dt>Related themes</dt><dd>{% for theme in company.themes or [] %}<span class="badge accent">{{ theme }}</span>{% else %}TBD{% endfor %}</dd></div>
+    </dl>
   </div>
 </section>
+
 <section class="section">
-  <h2>Company research checklist</h2>
+  <div class="section-head">
+    <div class="section-title">
+      <h2>Company research checklist</h2>
+      <p>Working notes for moat, economics, catalysts, risk, and valuation.</p>
+    </div>
+  </div>
   <div class="grid cols-2">
-    <p><strong>Value chain position</strong><br>{{ company.value_chain_position or "TBD" }}</p>
-    <p><strong>Moat</strong><br>{{ company.moat or "TBD" }}</p>
-    <p><strong>Management and capital allocation</strong><br>{{ company.management_capital_allocation or "TBD" }}</p>
-    <p><strong>Unit economics</strong><br>{{ company.unit_economics or "TBD" }}</p>
-    <p><strong>Growth drivers</strong><br>{{ company.growth_drivers or "TBD" }}</p>
-    <p><strong>Key risks</strong><br>{% for tag in company.risk_tags or [] %}<span class="badge">{{ tag }}</span>{% else %}TBD{% endfor %}</p>
-    <p><strong>Macro/geopolitical exposure</strong><br>{{ company.macro_exposures or "TBD" }}</p>
-    <p><strong>Valuation notes</strong><br>{{ company.valuation_notes or "TBD" }}</p>
+    <dl class="data-list">
+      <div><dt>Value chain</dt><dd>{{ company.value_chain_position or "TBD" }}</dd></div>
+      <div><dt>Moat</dt><dd>{{ company.moat or "TBD" }}</dd></div>
+      <div><dt>Management</dt><dd>{{ company.management_capital_allocation or "TBD" }}</dd></div>
+      <div><dt>Unit economics</dt><dd>{{ company.unit_economics or "TBD" }}</dd></div>
+    </dl>
+    <dl class="data-list">
+      <div><dt>Growth drivers</dt><dd>{{ company.growth_drivers or "TBD" }}</dd></div>
+      <div><dt>Key risks</dt><dd>{% for tag in company.risk_tags or [] %}<span class="badge warning">{{ tag }}</span>{% else %}TBD{% endfor %}</dd></div>
+      <div><dt>Macro exposure</dt><dd>{{ company.macro_exposures or "TBD" }}</dd></div>
+      <div><dt>Valuation</dt><dd>{{ company.valuation_notes or "TBD" }}</dd></div>
+    </dl>
   </div>
 </section>
-<section class="section">
-  <h2>Linked documents</h2>
+
+<section class="section flush">
+  <div class="section-pad">
+    <div class="section-head">
+      <div class="section-title">
+        <h2>Linked documents</h2>
+        <p>Indexed evidence connected to this company profile.</p>
+      </div>
+    </div>
+  </div>
+  <div class="table-wrap">
   <table class="table">
     <thead><tr><th>Title</th><th>Type</th><th>Fiscal year</th><th>Chunks</th><th>Source</th></tr></thead>
     <tbody>
       {% for doc in company.documents %}
-      <tr><td>{{ doc.title }}</td><td>{{ doc.document_type }}</td><td>{{ doc.fiscal_year or "" }}</td><td>{{ doc.chunks|length }}</td><td>{% if doc.source_url %}<a href="{{ doc.source_url }}">source</a>{% endif %}</td></tr>
+      <tr>
+        <td><span class="entity-title">{{ doc.title }}</span></td>
+        <td><span class="badge">{{ doc.document_type }}</span></td>
+        <td>{{ doc.fiscal_year or "" }}</td>
+        <td>{{ doc.chunks|length }}</td>
+        <td>{% if doc.source_url %}<a href="{{ doc.source_url }}">source</a>{% endif %}</td>
+      </tr>
       {% else %}
       <tr><td colspan="5" class="muted">No documents indexed for this company yet.</td></tr>
       {% endfor %}
     </tbody>
   </table>
+  </div>
 </section>
 {% endblock %}

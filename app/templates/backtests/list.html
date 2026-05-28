@@ -1,16 +1,41 @@
 {% extends "base.html" %}
 {% block title %}Backtests - Financial Wiki{% endblock %}
 {% block content %}
-<h1 class="page-title">Backtests</h1>
-<p><a class="button" href="{{ url_for('backtests.run') }}">Run sample backtest</a></p>
-<section class="section">
+<div class="page-header">
+  <div>
+    <div class="page-kicker">Strategy lab</div>
+    <h1 class="page-title">Backtests</h1>
+    <p class="page-subtitle">Stored strategy runs with symbols, sample ranges, and execution status.</p>
+  </div>
+  <div class="page-actions">
+    <a class="button" href="{{ url_for('backtests.run') }}">Run sample backtest</a>
+  </div>
+</div>
+
+<section class="section flush">
+  <div class="section-pad">
+    <div class="section-head">
+      <div class="section-title">
+        <h2>Run history</h2>
+        <p>Open a run to inspect assumptions, metrics, and generated artifacts.</p>
+      </div>
+      <span class="badge accent">{{ runs|length }} runs</span>
+    </div>
+  </div>
+  <div class="table-wrap">
   <table class="table">
     <thead><tr><th>Name</th><th>Symbols</th><th>Range</th><th>Status</th></tr></thead>
     <tbody>{% for run in runs %}
-      <tr><td><a href="{{ url_for('backtests.detail', run_id=run.id) }}">{{ run.name }}</a></td><td>{{ run.symbols }}</td><td>{{ run.start_date }} to {{ run.end_date }}</td><td>{{ run.status }}</td></tr>
+      <tr>
+        <td><a href="{{ url_for('backtests.detail', run_id=run.id) }}">{{ run.name }}</a></td>
+        <td><span class="badge">{{ run.symbols }}</span></td>
+        <td>{{ run.start_date }} to {{ run.end_date }}</td>
+        <td><span class="badge accent">{{ run.status }}</span></td>
+      </tr>
     {% else %}
       <tr><td colspan="4" class="muted">No runs yet.</td></tr>
     {% endfor %}</tbody>
   </table>
+  </div>
 </section>
 {% endblock %}

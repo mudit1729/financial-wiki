@@ -3,7 +3,9 @@ import re
 from datetime import datetime
 from pathlib import Path
 from typing import Iterable
+from urllib.parse import unquote, urlparse
 
+import requests
 from bs4 import BeautifulSoup
 from flask import current_app
 from PyPDF2 import PdfReader
@@ -15,6 +17,7 @@ from app.services.storage import get_storage
 
 
 ALLOWED_EXTENSIONS = {".pdf", ".txt", ".md", ".markdown", ".html", ".htm"}
+DEFAULT_URL_TIMEOUT = 30
 
 
 def checksum_file(path: Path) -> str:
@@ -73,6 +76,80 @@ def ingest_upload(upload, metadata: dict):
     return ingest_file(raw_path, metadata)
 
 
+def _storage_write_bytes(relative_path: str, content: bytes) -> Path:
+    storage = get_storage(current_app)
+    if not hasattr(storage, "_resolve"):
+        raise NotImplementedError("URL downloads currently require local filesystem storage")
+    path = storage._resolve(relative_path)
+    path.write_bytes(content)
+    return path
+
+
+def _filename_from_url(url: str, content_type: str | None = None, fallback: str = "download") -> str:
+    parsed = urlparse(url)
+    name = secure_filename(unquote(Path(parsed.path).name))
+    if not name:
+        name = secure_filename(fallback) or "download"
+    suffix = Path(name).suffix.lower()
+    if not suffix and content_type:
+        content_type = content_type.split(";", 1)[0].strip().lower()
+        if content_type in {"text/html", "application/xhtml+xml"}:
+            suffix = ".html"
+        elif content_type == "application/pdf":
+            suffix = ".pdf"
+        elif content_type.startswith("text/"):
+            suffix = ".txt"
+        if suffix:
+            name = f"{name}{suffix}"
+    suffix = Path(name).suffix.lower()
+    if suffix not in ALLOWED_EXTENSIONS:
+        raise ValueError(f"Unsupported downloaded file type: {suffix or 'unknown'}")
+    return name
+
+
+def download_url_to_storage(
+    url: str,
+    metadata: dict | None = None,
+    headers: dict | None = None,
+    timeout: int = DEFAULT_URL_TIMEOUT,
+    http_get=requests.get,
+) -> Path:
+    metadata = metadata or {}
+    parsed = urlparse(url)
+    if parsed.scheme not in {"http", "https"}:
+        raise ValueError("Only http and https URLs can be ingested")
+
+    response = http_get(url, headers=headers or {}, timeout=timeout)
+    response.raise_for_status()
+    content = response.content
+    if not content:
+        raise ValueError(f"No content downloaded from {url}")
+
+    max_length = current_app.config.get("MAX_CONTENT_LENGTH")
+    content_length = response.headers.get("content-length")
+    if max_length and content_length and int(content_length) > max_length:
+        raise ValueError(f"Downloaded document exceeds MAX_CONTENT_LENGTH: {content_length} bytes")
+    if max_length and len(content) > max_length:
+        raise ValueError(f"Downloaded document exceeds MAX_CONTENT_LENGTH: {len(content)} bytes")
+
+    filename = _filename_from_url(
+        url,
+        response.headers.get("content-type"),
+        fallback=metadata.get("title") or metadata.get("document_type") or "download",
+    )
+    checksum = hashlib.sha256(content).hexdigest()
+    ticker = (metadata.get("ticker") or "unassigned").upper()
+    stored_filename = secure_filename(f"{Path(filename).stem}-{checksum[:12]}{Path(filename).suffix.lower()}")
+    raw_relative = f"raw/company_documents/{ticker}/url_downloads/{stored_filename}"
+    return _storage_write_bytes(raw_relative, content)
+
+
+def ingest_url(url: str, metadata: dict, headers: dict | None = None, http_get=requests.get):
+    metadata = {**metadata, "source_url": metadata.get("source_url") or url}
+    raw_path = download_url_to_storage(url, metadata, headers=headers, http_get=http_get)
+    return ingest_file(raw_path, metadata)
+
+
 def ingest_file(path: Path, metadata: dict):
     path = Path(path)
     text = extract_text(path)
@@ -104,6 +181,8 @@ def ingest_file(path: Path, metadata: dict):
     )
     if metadata.get("filing_date"):
         doc.filing_date = datetime.strptime(metadata["filing_date"], "%Y-%m-%d").date()
+    if metadata.get("period_end_date"):
+        doc.period_end_date = datetime.strptime(metadata["period_end_date"], "%Y-%m-%d").date()
     if metadata.get("fiscal_year"):
         doc.fiscal_year = int(metadata["fiscal_year"])
 
@@ -120,9 +199,14 @@ def ingest_file(path: Path, metadata: dict):
             "industry": company.industry if company else metadata.get("industry"),
             "document_type": doc.document_type,
             "filing_date": str(doc.filing_date) if doc.filing_date else None,
+            "period_end_date": str(doc.period_end_date) if doc.period_end_date else None,
             "fiscal_year": doc.fiscal_year,
             "source_url": doc.source_url,
             "theme": metadata.get("theme"),
+            "sec_source": metadata.get("sec_source"),
+            "sec_cik": metadata.get("sec_cik"),
+            "sec_accession_number": metadata.get("sec_accession_number"),
+            "sec_form": metadata.get("sec_form"),
         }
         db.session.add(
             DocumentChunk(

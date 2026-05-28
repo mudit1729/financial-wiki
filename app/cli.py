@@ -9,7 +9,8 @@ from app.extensions import db
 from app.models import BacktestMetric, BacktestRun
 from app.services.backtesting import run_200_day_ma, save_backtest_artifacts
 from app.services.company_universe import seed_companies, seed_research_entities
-from app.services.document_ingestion import ingest_file
+from app.services.document_ingestion import ingest_file, ingest_url
+from app.services.sec_edgar import SecEdgarClient
 from app.services.stooq import download_daily, load_clean_prices
 
 
@@ -50,6 +51,80 @@ def register(app):
             },
         )
         click.echo(f"Ingested {doc.title} with {len(doc.chunks)} chunks.")
+
+    @app.cli.command("ingest-url")
+    @click.argument("url")
+    @click.option("--ticker")
+    @click.option("--document-type", default="note", show_default=True)
+    @click.option("--title")
+    @click.option("--filing-date", type=click.DateTime(formats=["%Y-%m-%d"]))
+    @click.option("--period-end-date", type=click.DateTime(formats=["%Y-%m-%d"]))
+    @click.option("--fiscal-year", type=int)
+    def ingest_url_cmd(url, ticker, document_type, title, filing_date, period_end_date, fiscal_year):
+        doc = ingest_url(
+            url,
+            {
+                "ticker": ticker,
+                "document_type": document_type,
+                "title": title,
+                "filing_date": filing_date.date().isoformat() if filing_date else None,
+                "period_end_date": period_end_date.date().isoformat() if period_end_date else None,
+                "fiscal_year": fiscal_year,
+            },
+        )
+        click.echo(f"Ingested {doc.title} with {len(doc.chunks)} chunks from {url}.")
+
+    @app.cli.command("discover-sec-filings")
+    @click.option("--ticker")
+    @click.option("--cik")
+    @click.option("--form", "forms", multiple=True)
+    @click.option("--limit", default=5, show_default=True, type=int)
+    @click.option("--user-agent", envvar="SEC_EDGAR_USER_AGENT")
+    def discover_sec_filings_cmd(ticker, cik, forms, limit, user_agent):
+        if not ticker and not cik:
+            raise click.ClickException("Provide --ticker or --cik.")
+        try:
+            client = SecEdgarClient(user_agent=user_agent)
+            if ticker and not cik:
+                company = client.lookup_ticker(ticker)
+                cik = company.cik
+            filings = client.recent_filings(cik, forms=forms, ticker=ticker.upper() if ticker else None, limit=limit)
+        except Exception as exc:
+            raise click.ClickException(str(exc)) from exc
+        if not filings:
+            click.echo("No matching recent filings found.")
+            return
+        for filing in filings:
+            report_date = filing.report_date or ""
+            click.echo(
+                f"{filing.form}\tfiled={filing.filing_date}\treport={report_date}\t"
+                f"accession={filing.accession_number}\t{filing.document_url}"
+            )
+
+    @app.cli.command("ingest-sec-filing")
+    @click.option("--ticker")
+    @click.option("--cik")
+    @click.option("--form", "forms", multiple=True)
+    @click.option("--document-type")
+    @click.option("--user-agent", envvar="SEC_EDGAR_USER_AGENT")
+    def ingest_sec_filing_cmd(ticker, cik, forms, document_type, user_agent):
+        if not ticker and not cik:
+            raise click.ClickException("Provide --ticker or --cik.")
+        selected_forms = forms or ("10-K",)
+        try:
+            client = SecEdgarClient(user_agent=user_agent)
+            filing = client.latest_filing(ticker=ticker, cik=cik, forms=selected_forms)
+            doc = ingest_url(
+                filing.document_url,
+                filing.ingestion_metadata(document_type=document_type),
+                headers=client.headers,
+            )
+        except Exception as exc:
+            raise click.ClickException(str(exc)) from exc
+        click.echo(
+            f"Ingested {doc.title} ({filing.accession_number}) with {len(doc.chunks)} chunks "
+            f"from SEC EDGAR."
+        )
 
     @app.cli.command("download-stooq")
     @click.option("--symbol", multiple=True)

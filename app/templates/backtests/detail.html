@@ -1,19 +1,59 @@
 {% extends "base.html" %}
 {% block title %}{{ run.name }} - Financial Wiki{% endblock %}
 {% block content %}
-<h1 class="page-title">{{ run.name }}</h1>
+<div class="page-header">
+  <div>
+    <div class="page-kicker">Backtest report</div>
+    <h1 class="page-title">{{ run.name }}</h1>
+    <p class="page-subtitle">Stored assumptions, run range, performance metrics, and generated artifacts.</p>
+  </div>
+  <div class="page-actions">
+    <a class="button secondary" href="{{ url_for('backtests.list_runs') }}">Run history</a>
+    <a class="button" href="{{ url_for('backtests.run') }}">Run another</a>
+  </div>
+</div>
+
 <section class="section">
-  <p><strong>Symbols:</strong> {{ run.symbols }}<br><strong>Range:</strong> {{ run.start_date }} to {{ run.end_date }}</p>
-  <p class="muted">Assumptions: {{ run.assumptions }}</p>
+  <div class="metric-strip">
+    <div class="metric"><span>Symbols</span><strong>{{ run.symbols }}</strong></div>
+    <div class="metric"><span>Start</span><strong>{{ run.start_date }}</strong></div>
+    <div class="metric"><span>End</span><strong>{{ run.end_date }}</strong></div>
+    <div class="metric"><span>Status</span><strong>{{ run.status or "saved" }}</strong></div>
+  </div>
+  <p class="muted mt-12">Assumptions: {{ run.assumptions }}</p>
+</section>
+
+<section class="section flush">
+  <div class="section-pad">
+    <div class="section-head">
+      <div class="section-title">
+        <h2>Metrics</h2>
+        <p>Result summary produced by the backtest service.</p>
+      </div>
+    </div>
+  </div>
+  <div class="table-wrap">
   <table class="table">
     <thead><tr><th>Metric</th><th>Value</th></tr></thead>
     <tbody>{% for metric in run.metrics %}
-      <tr><td>{{ metric.name }}</td><td>{{ metric.value }}</td></tr>
+      <tr><td>{{ metric.name }}</td><td class="numeric">{{ metric.value }}</td></tr>
     {% endfor %}</tbody>
   </table>
+  </div>
 </section>
+
 <section class="section">
-  <h2>Artifacts</h2>
-  <p class="muted">{{ run.summary_path }}<br>{{ run.equity_curve_path }}<br>{{ run.drawdown_curve_path }}<br>{{ run.trades_path }}</p>
+  <div class="section-head">
+    <div class="section-title">
+      <h2>Artifacts</h2>
+      <p>Generated files from the run output directory.</p>
+    </div>
+  </div>
+  <div class="artifact-list">
+    <span class="artifact-path">{{ run.summary_path }}</span>
+    <span class="artifact-path">{{ run.equity_curve_path }}</span>
+    <span class="artifact-path">{{ run.drawdown_curve_path }}</span>
+    <span class="artifact-path">{{ run.trades_path }}</span>
+  </div>
 </section>
 {% endblock %}

@@ -1,14 +1,27 @@
 {% extends "base.html" %}
 {% block title %}Themes - Financial Wiki{% endblock %}
 {% block content %}
-<h1 class="page-title">Global themes</h1>
-{% for theme in themes %}
-<section class="section">
-  <h2>{{ theme.name }}</h2>
-  <p>{{ theme.definition }}</p>
-  <p><strong>Why it matters now</strong><br>{{ theme.why_now or "TBD" }}</p>
-  <p><strong>Metrics to monitor</strong><br>{{ theme.metrics_to_monitor or "TBD" }}</p>
-  <p><strong>Risks</strong><br>{{ theme.risks or "TBD" }}</p>
+<div class="page-header">
+  <div>
+    <div class="page-kicker">Research taxonomy</div>
+    <h1 class="page-title">Global themes</h1>
+    <p class="page-subtitle">Cross-company narratives with monitoring metrics, current relevance, and risk framing.</p>
+  </div>
+</div>
+
+<section class="grid cols-2">
+  {% for theme in themes %}
+  <article class="research-card">
+    <h2>{{ theme.name }} <span class="badge accent">{{ theme.slug }}</span></h2>
+    <p class="summary">{{ theme.definition }}</p>
+    <dl class="data-list">
+      <div><dt>Why now</dt><dd>{{ theme.why_now or "TBD" }}</dd></div>
+      <div><dt>Metrics</dt><dd>{{ theme.metrics_to_monitor or "TBD" }}</dd></div>
+      <div><dt>Risks</dt><dd>{{ theme.risks or "TBD" }}</dd></div>
+    </dl>
+  </article>
+  {% else %}
+  <div class="empty-state">No themes loaded.</div>
+  {% endfor %}
 </section>
-{% endfor %}
 {% endblock %}

@@ -1,24 +1,48 @@
 {% extends "base.html" %}
 {% block title %}Companies - Financial Wiki{% endblock %}
 {% block content %}
-<h1 class="page-title">Companies</h1>
-<section class="section">
-  <p class="muted">Seeded market-cap ranking is dated and source-specific. Refreshing the universe updates metadata while preserving notes and indexed documents.</p>
+<div class="page-header">
+  <div>
+    <div class="page-kicker">Universe</div>
+    <h1 class="page-title">Companies</h1>
+    <p class="page-subtitle">Seeded market-cap ranking is dated and source-specific. Refreshing the universe updates metadata while preserving notes and indexed documents.</p>
+  </div>
+</div>
+
+<section class="section flush">
+  <div class="section-pad">
+    <div class="section-head">
+      <div class="section-title">
+        <h2>Coverage table</h2>
+        <p>Company metadata, classification, and market-cap context.</p>
+      </div>
+      <span class="badge accent">{{ companies|length }} names</span>
+    </div>
+  </div>
+  <div class="table-wrap">
   <table class="table">
-    <thead><tr><th>Rank</th><th>Company</th><th>Ticker</th><th>Exchange</th><th>Country</th><th>Sector</th><th>Market cap</th></tr></thead>
+    <thead><tr><th>Rank</th><th>Company</th><th>Ticker</th><th>Exchange</th><th>Country</th><th>Sector</th><th class="numeric">Market cap</th></tr></thead>
     <tbody>
       {% for company in companies %}
       <tr>
-        <td>{{ company.market_cap_rank }}</td>
-        <td><a href="{{ url_for('companies.detail', ticker=company.ticker) }}">{{ company.name }}</a></td>
-        <td>{{ company.ticker }}</td>
+        <td class="nowrap">{{ company.market_cap_rank }}</td>
+        <td>
+          <span class="entity">
+            <a class="entity-title" href="{{ url_for('companies.detail', ticker=company.ticker) }}">{{ company.name }}</a>
+            <span class="entity-meta">{{ company.industry or "Industry pending" }}</span>
+          </span>
+        </td>
+        <td><span class="badge">{{ company.ticker }}</span></td>
         <td>{{ company.exchange or "" }}</td>
         <td>{{ company.country or "" }}</td>
         <td>{{ company.sector or "" }}</td>
-        <td>{% if company.market_cap %}${{ "%.0f"|format(company.market_cap) }}B{% endif %}</td>
+        <td class="numeric">{% if company.market_cap %}${{ "%.0f"|format(company.market_cap) }}B{% endif %}</td>
       </tr>
+      {% else %}
+      <tr><td colspan="7" class="muted">No companies loaded.</td></tr>
       {% endfor %}
     </tbody>
   </table>
+  </div>
 </section>
 {% endblock %}

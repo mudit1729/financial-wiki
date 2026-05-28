@@ -1,9 +1,37 @@
 {% extends "base.html" %}
 {% block title %}RAG - Financial Wiki{% endblock %}
 {% block content %}
-<h1 class="page-title">Source-cited RAG</h1>
+<div class="page-header">
+  <div>
+    <div class="page-kicker">Evidence retrieval</div>
+    <h1 class="page-title">Source-cited RAG</h1>
+    <p class="page-subtitle">Ask focused research questions and filter retrieval by company, document type, sector, geography, fiscal year, or theme.</p>
+  </div>
+  <div class="page-actions">
+    <a class="button secondary" href="{{ url_for('documents.library') }}">Review library</a>
+  </div>
+</div>
+
+<section class="stat-grid">
+  <div class="stat">
+    <span class="stat-label">Indexed documents</span>
+    <strong>{{ status.document_count }}</strong>
+    <small>Available for retrieval</small>
+  </div>
+  <div class="stat">
+    <span class="stat-label">Indexed chunks</span>
+    <strong>{{ status.chunk_count }}</strong>
+    <small>Searchable evidence units</small>
+  </div>
+</section>
+
 <section class="section">
-  <p class="muted">Indexed documents: {{ status.document_count }}. Indexed chunks: {{ status.chunk_count }}.</p>
+  <div class="section-head">
+    <div class="section-title">
+      <h2>Query workspace</h2>
+      <p>Start broad, then narrow filters to audit the evidence behind an answer.</p>
+    </div>
+  </div>
   <form method="post">
     <label>Question<textarea name="question" required>{{ question }}</textarea></label>
     <div class="form-grid">
@@ -24,28 +52,57 @@
         </select>
       </label>
     </div>
-    <p><button type="submit">Retrieve evidence</button></p>
+    <div class="form-actions">
+      <button type="submit">Retrieve evidence</button>
+    </div>
   </form>
 </section>
 {% if result %}
-<section class="section">
-  <h2>Answer panel</h2>
+<section class="section answer-panel">
+  <div class="section-head">
+    <div class="section-title">
+      <h2>Answer panel</h2>
+    </div>
+  </div>
   <pre class="chunk">{{ result.answer }}</pre>
 </section>
-<section class="section">
-  <h2>Source citations</h2>
+
+<section class="section flush">
+  <div class="section-pad">
+    <div class="section-head">
+      <div class="section-title">
+        <h2>Source citations</h2>
+        <p>Retrieved source set with page, section, and relevance score.</p>
+      </div>
+    </div>
+  </div>
+  <div class="table-wrap">
   <table class="table">
     <thead><tr><th>Title</th><th>Ticker</th><th>Type</th><th>Page/section</th><th>Score</th></tr></thead>
     <tbody>{% for cite in result.citations %}
-      <tr><td>{% if cite.source_url %}<a href="{{ cite.source_url }}">{{ cite.title }}</a>{% else %}{{ cite.title }}{% endif %}</td><td>{{ cite.ticker }}</td><td>{{ cite.document_type }}</td><td>{{ cite.page_number or cite.section or "" }}</td><td>{{ cite.score }}</td></tr>
+      <tr>
+        <td>{% if cite.source_url %}<a href="{{ cite.source_url }}">{{ cite.title }}</a>{% else %}<span class="entity-title">{{ cite.title }}</span>{% endif %}</td>
+        <td>{% if cite.ticker %}<span class="badge">{{ cite.ticker }}</span>{% endif %}</td>
+        <td><span class="badge">{{ cite.document_type }}</span></td>
+        <td>{{ cite.page_number or cite.section or "" }}</td>
+        <td class="numeric">{{ cite.score }}</td>
+      </tr>
     {% endfor %}</tbody>
   </table>
+  </div>
 </section>
 <section class="section">
-  <h2>Retrieved chunks</h2>
+  <div class="section-head">
+    <div class="section-title">
+      <h2>Retrieved chunks</h2>
+      <p>Raw text excerpts used by the answer panel.</p>
+    </div>
+  </div>
   {% for chunk in result.chunks %}
-    <h3>Chunk {{ chunk.id }} <span class="muted">score {{ chunk.score }}</span></h3>
-    <pre class="chunk">{{ chunk.text }}</pre>
+    <div class="chunk-result">
+      <h3>Chunk {{ chunk.id }} <span class="badge">{{ chunk.score }}</span></h3>
+      <pre class="chunk">{{ chunk.text }}</pre>
+    </div>
   {% endfor %}
 </section>
 {% endif %}

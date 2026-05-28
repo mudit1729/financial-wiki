@@ -1,14 +1,27 @@
 {% extends "base.html" %}
 {% block title %}Macro - Financial Wiki{% endblock %}
 {% block content %}
-<h1 class="page-title">Macro and geopolitics</h1>
-{% for event in events %}
-<section class="section">
-  <h2>{{ event.title }}</h2>
-  <p>{{ event.summary }}</p>
-  <p><strong>Countries</strong><br>{{ event.countries }}</p>
-  <p><strong>Transmission channels</strong><br>{{ event.transmission_channels }}</p>
-  <p><strong>Watch indicators</strong><br>{{ event.watch_indicators or "TBD" }}</p>
+<div class="page-header">
+  <div>
+    <div class="page-kicker">Macro monitor</div>
+    <h1 class="page-title">Macro and geopolitics</h1>
+    <p class="page-subtitle">Event-level macro notes with affected countries, transmission channels, and watch indicators.</p>
+  </div>
+</div>
+
+<section class="grid cols-2">
+  {% for event in events %}
+  <article class="research-card">
+    <h2>{{ event.title }}</h2>
+    <p class="summary">{{ event.summary }}</p>
+    <dl class="data-list">
+      <div><dt>Countries</dt><dd>{{ event.countries }}</dd></div>
+      <div><dt>Transmission</dt><dd>{{ event.transmission_channels }}</dd></div>
+      <div><dt>Watch indicators</dt><dd>{{ event.watch_indicators or "TBD" }}</dd></div>
+    </dl>
+  </article>
+  {% else %}
+  <div class="empty-state">No macro events loaded.</div>
+  {% endfor %}
 </section>
-{% endfor %}
 {% endblock %}

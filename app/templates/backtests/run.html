@@ -1,12 +1,26 @@
 {% extends "base.html" %}
 {% block title %}Run Backtest - Financial Wiki{% endblock %}
 {% block content %}
-<h1 class="page-title">Run 200-day moving average backtest</h1>
+<div class="page-header">
+  <div>
+    <div class="page-kicker">Strategy lab</div>
+    <h1 class="page-title">Run 200-day moving average backtest</h1>
+    <p class="page-subtitle">Use cleaned Stooq bars already loaded into the database to generate a sample trend-following run.</p>
+  </div>
+  <div class="page-actions">
+    <a class="button secondary" href="{{ url_for('backtests.list_runs') }}">Run history</a>
+  </div>
+</div>
+
 <section class="section">
-  <p class="muted">This sample backtest uses cleaned Stooq bars already loaded into the database.</p>
   <form method="post">
-    <label>Symbol<input name="symbol" value="AAPL"></label>
-    <p><button type="submit">Run backtest</button></p>
+    <div class="form-grid">
+      <label>Symbol<input name="symbol" value="AAPL"></label>
+      <label>Benchmark symbol<input name="benchmark_symbol" value="SPY"></label>
+    </div>
+    <div class="form-actions">
+      <button type="submit">Run backtest</button>
+    </div>
   </form>
 </section>
 {% endblock %}

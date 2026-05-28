@@ -1,8 +1,24 @@
 {% extends "base.html" %}
 {% block title %}Upload Document - Financial Wiki{% endblock %}
 {% block content %}
-<h1 class="page-title">Upload source document</h1>
+<div class="page-header">
+  <div>
+    <div class="page-kicker">Evidence intake</div>
+    <h1 class="page-title">Upload source document</h1>
+    <p class="page-subtitle">Attach a document to a company, classify it, and index it for source-cited retrieval.</p>
+  </div>
+  <div class="page-actions">
+    <a class="button secondary" href="{{ url_for('documents.library') }}">Document library</a>
+  </div>
+</div>
+
 <section class="section">
+  <div class="section-head">
+    <div class="section-title">
+      <h2>Source metadata</h2>
+      <p>Use the most specific type and company assignment available.</p>
+    </div>
+  </div>
   <form method="post" enctype="multipart/form-data">
     <div class="form-grid">
       <label>File<input type="file" name="file" required></label>
@@ -25,7 +41,9 @@
       <label>Fiscal year<input type="number" name="fiscal_year" min="1900" max="2100"></label>
       <label>Theme<input name="theme" placeholder="ai-infrastructure"></label>
     </div>
-    <p><button type="submit">Ingest and index</button></p>
+    <div class="form-actions">
+      <button type="submit">Ingest and index</button>
+    </div>
   </form>
 </section>
 {% endblock %}

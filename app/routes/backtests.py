@@ -10,6 +10,12 @@ from flask import current_app
 bp = Blueprint("backtests", __name__, url_prefix="/backtests")
 
 
+def _bars_to_frame(bars):
+    return pd.DataFrame(
+        [{"Date": b.date, "Open": b.open, "High": b.high, "Low": b.low, "Close": b.close, "Volume": b.volume} for b in bars]
+    )
+
+
 @bp.get("")
 def list_runs():
     runs = BacktestRun.query.order_by(BacktestRun.created_at.desc()).all()
@@ -20,23 +26,36 @@ def list_runs():
 def run():
     if request.method == "POST":
         symbol = (request.form.get("symbol") or "AAPL").upper()
+        benchmark_symbol = (request.form.get("benchmark_symbol") or "SPY").upper()
         bars = PriceBar.query.filter_by(symbol=symbol).order_by(PriceBar.date.asc()).all()
         if len(bars) < 220:
             flash(f"Need at least 220 cleaned price bars for {symbol}. Run `flask download-stooq --symbol {symbol}` first.", "error")
             return redirect(url_for("backtests.run"))
-        frame = pd.DataFrame(
-            [{"Date": b.date, "Open": b.open, "High": b.high, "Low": b.low, "Close": b.close, "Volume": b.volume} for b in bars]
-        )
-        result = run_200_day_ma(frame)
+        frame = _bars_to_frame(bars)
+        benchmark_frame = None
+        benchmark_loaded = False
+        if benchmark_symbol and benchmark_symbol != symbol:
+            benchmark_bars = PriceBar.query.filter_by(symbol=benchmark_symbol).order_by(PriceBar.date.asc()).all()
+            if benchmark_bars:
+                benchmark_frame = _bars_to_frame(benchmark_bars)
+                benchmark_loaded = True
+        result = run_200_day_ma(frame, benchmark_prices=benchmark_frame, benchmark_symbol=benchmark_symbol if benchmark_loaded else None)
         paths = save_backtest_artifacts(result, current_app.config["STORAGE_ROOT"] / "processed" / "backtests", f"{symbol}-200dma")
+        symbols = [symbol]
+        if benchmark_loaded and "benchmark_total_return" in result["metrics"]:
+            symbols.append(benchmark_symbol)
         run_row = BacktestRun(
             name=f"{symbol} 200-day moving average",
             strategy_slug="200-day-ma-trend",
-            symbols=[symbol],
+            symbols=symbols,
             start_date=bars[0].date,
             end_date=bars[-1].date,
-            config={"ma_window": 200, "initial_cash": 100000},
-            assumptions=["Long-only close-to-close exposure using signal lagged one day.", "No commissions, taxes, slippage, borrow costs, or survivorship corrections."],
+            config={"ma_window": 200, "initial_cash": 100000, "benchmark_symbol": benchmark_symbol if benchmark_loaded else None},
+            assumptions=[
+                "Long-only close-to-close exposure using signal lagged one day.",
+                "No commissions, taxes, slippage, borrow costs, or survivorship corrections.",
+                "Benchmark comparison is included only when benchmark bars are already loaded.",
+            ],
             **paths,
         )
         db.session.add(run_row)

@@ -1,18 +1,51 @@
 {% extends "base.html" %}
 {% block title %}Documents - Financial Wiki{% endblock %}
 {% block content %}
-<h1 class="page-title">Document library</h1>
-<p><a class="button" href="{{ url_for('documents.upload') }}">Upload document</a></p>
-<section class="section">
+<div class="page-header">
+  <div>
+    <div class="page-kicker">Evidence library</div>
+    <h1 class="page-title">Document library</h1>
+    <p class="page-subtitle">Filings, transcripts, presentations, and notes that power company pages and retrieval workflows.</p>
+  </div>
+  <div class="page-actions">
+    <a class="button" href="{{ url_for('documents.upload') }}">Upload document</a>
+  </div>
+</div>
+
+<section class="section flush">
+  <div class="section-pad">
+    <div class="section-head">
+      <div class="section-title">
+        <h2>Indexed sources</h2>
+        <p>Coverage status by ticker, document type, fiscal year, and chunk count.</p>
+      </div>
+      <span class="badge accent">{{ documents|length }} documents</span>
+    </div>
+  </div>
+  <div class="table-wrap">
   <table class="table">
     <thead><tr><th>Title</th><th>Ticker</th><th>Type</th><th>Fiscal year</th><th>Chunks</th><th>Indexed</th></tr></thead>
     <tbody>
       {% for doc in documents %}
-      <tr><td>{{ doc.title }}</td><td>{{ doc.ticker or "" }}</td><td>{{ doc.document_type }}</td><td>{{ doc.fiscal_year or "" }}</td><td>{{ doc.chunks|length }}</td><td>{{ "yes" if doc.indexed_for_rag else "no" }}</td></tr>
+      <tr>
+        <td><span class="entity-title">{{ doc.title }}</span></td>
+        <td>{% if doc.ticker %}<span class="badge">{{ doc.ticker }}</span>{% endif %}</td>
+        <td><span class="badge">{{ doc.document_type }}</span></td>
+        <td>{{ doc.fiscal_year or "" }}</td>
+        <td>{{ doc.chunks|length }}</td>
+        <td>
+          {% if doc.indexed_for_rag %}
+            <span class="badge success">yes</span>
+          {% else %}
+            <span class="badge warning">no</span>
+          {% endif %}
+        </td>
+      </tr>
       {% else %}
       <tr><td colspan="6" class="muted">No documents yet.</td></tr>
       {% endfor %}
     </tbody>
   </table>
+  </div>
 </section>
 {% endblock %}
